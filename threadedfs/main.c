@@ -8,17 +8,34 @@
 
 #include <stdio.h>
 #include <pthread.h>
+#include <stdlib.h>
+#include<unistd.h>
 
-void threaded(int i)
+pthread_t test1;
+
+void * threaded(void *arg)
 {
-    printf("I am now %d\n",i);
+    printf("I am now with PID: %u\n",getpid());
+    printf("I am inside the thread: %u\n", (unsigned int)pthread_self());
+    
+    return( (void *)0);
+    
     
 }
 
 int main(int argc, const char * argv[]) {
     // insert code here...
     int i;
-    for(i=0;i<5;i++)
-        threaded(i);
-    return 0;
+    
+    i=pthread_create(&test1,NULL,threaded,NULL);
+    if(i!=0)
+        return i;
+    else
+    {
+        pthread_join(test1,NULL);
+        printf("I am now in main with PID: %u\n",getpid());
+        printf("I am inside the thread: %u\n", (unsigned int)pthread_self());
+        return 0;
+    }
+
 }
