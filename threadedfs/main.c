@@ -27,19 +27,13 @@ int main(int argc, const char * argv[]) {
     unsigned int size_in_bytes;
     unsigned int blocksize;
     char blanked=' ';
-    INODE_STRUCT ind;
+//    INODE_STRUCT ind;
     
-    time_t opentime;
+
     
     FILE * fsfile;
     
-    struct tm * opentimest;
 
-    struct runtime
-    {
-        
-        char timewrite[16];
-    } * rt;
     
     if( argc !=4)
     {
