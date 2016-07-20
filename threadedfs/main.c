@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <pthread.h>
 #define MAXSIZE 1024
 #define MAXLINE 80
 
