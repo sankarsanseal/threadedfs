@@ -6,6 +6,8 @@
 //  Copyright © 2016 Sankarsan Seal. All rights reserved.
 //
 
+#define FILEPERM S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH|S_IRGRP
+
 
 typedef struct inode_struct
 {

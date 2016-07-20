@@ -12,6 +12,11 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <string.h>
+#define MAXSIZE 1024
+#define MAXLINE 80
+
 
 #include "inode_struct.c"
 
@@ -27,9 +32,23 @@ int main(int argc, const char * argv[]) {
     unsigned int size_in_bytes;
     unsigned int blocksize;
     unsigned int pid;
+    unsigned int servfifo;
+    unsigned int dummy;
+    unsigned int userid;
+    unsigned int instruct_code;
+    pid_t client_pid;
+    
+    unsigned int clientfifo;
+    
+    int errno;
+    ssize_t n;
     char blanked=' ';
-    char path_to_server_fifo[1024];
-    char path_to_lock_file[1024];
+    char buff[MAXSIZE];
+    char path[MAXSIZE];
+    char path_to_server_fifo[MAXSIZE];
+    char path_to_client_fifo[MAXSIZE];
+    char path_to_lock_file[MAXSIZE];
+    char msg[MAXSIZE];
     
 //    INODE_STRUCT ind;
     
@@ -47,7 +66,7 @@ int main(int argc, const char * argv[]) {
     }
     else
     {
-        size_in_bytes=atoi(argv[1])<<20;
+      /*  size_in_bytes=atoi(argv[1])<<20;
         blocksize=atoi(argv[2]);
         
         no_of_inode=(size_in_bytes)/blocksize;
@@ -87,7 +106,35 @@ int main(int argc, const char * argv[]) {
         
         
         
-        fclose(fsfile);
+        fclose(fsfile);*/
+        if((errno=mkfifo("/tmp/server", S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH|S_IRGRP)<0))
+        {
+            printf("FIFO exists\n");
+            unlink("/tmp/server");
+        }
+        else
+        {
+            
+            servfifo=open("/tmp/server",O_RDONLY);
+            dummy=open("/tmp/server",O_WRONLY);
+            
+            while((n=read(servfifo,buff,MAXLINE)))
+            {
+            
+                printf("%s\n",buff);
+                sscanf(buff, "%d %d %s %d",&instruct_code,&userid,path,&client_pid);
+                
+                sprintf(path_to_client_fifo,"/tmp/client.%d",client_pid);
+                
+                clientfifo=open(path_to_client_fifo,O_WRONLY);
+                sprintf(msg,"Instruction %d received for user %d\n",instruct_code,userid);
+                write(clientfifo,msg , MAXSIZE);
+                close(clientfifo);
+                
+                
+            }
+            unlink("/tmp/server");
+        }
         return 0;
     }
 }
