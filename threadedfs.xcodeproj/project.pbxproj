@@ -7,8 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6A4AFAAB1D3F212000536109 /* inode_struct.c in Sources */ = {isa = PBXBuildFile; fileRef = 6A4AFAAA1D3F212000536109 /* inode_struct.c */; };
 		6AFCD19D1D3C8D4D00D6DB21 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 6AFCD19C1D3C8D4D00D6DB21 /* main.c */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		6A4AFAC31D3F425000536109 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 6A4AFAB51D3F424E00536109;
+			remoteInfo = threadedfs_client;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		6AFCD1971D3C8D4D00D6DB21 /* CopyFiles */ = {
@@ -23,6 +34,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6A4AFAAA1D3F212000536109 /* inode_struct.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inode_struct.c; sourceTree = "<group>"; };
+		6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = threadedfs_client.xcodeproj; path = threadedfs_client/threadedfs_client.xcodeproj; sourceTree = "<group>"; };
 		6AFCD1991D3C8D4D00D6DB21 /* threadedfs */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = threadedfs; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFCD19C1D3C8D4D00D6DB21 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -38,6 +51,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		6A4AFAC01D3F424E00536109 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6A4AFAC41D3F425000536109 /* threadedfs_client */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		6AFCD1901D3C8D4D00D6DB21 = {
 			isa = PBXGroup;
 			children = (
@@ -57,7 +78,9 @@
 		6AFCD19B1D3C8D4D00D6DB21 /* threadedfs */ = {
 			isa = PBXGroup;
 			children = (
+				6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */,
 				6AFCD19C1D3C8D4D00D6DB21 /* main.c */,
+				6A4AFAAA1D3F212000536109 /* inode_struct.c */,
 			);
 			path = threadedfs;
 			sourceTree = "<group>";
@@ -106,6 +129,12 @@
 			mainGroup = 6AFCD1901D3C8D4D00D6DB21;
 			productRefGroup = 6AFCD19A1D3C8D4D00D6DB21 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 6A4AFAC01D3F424E00536109 /* Products */;
+					ProjectRef = 6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				6AFCD1981D3C8D4D00D6DB21 /* threadedfs */,
@@ -113,11 +142,22 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXReferenceProxy section */
+		6A4AFAC41D3F425000536109 /* threadedfs_client */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = threadedfs_client;
+			remoteRef = 6A4AFAC31D3F425000536109 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
 /* Begin PBXSourcesBuildPhase section */
 		6AFCD1951D3C8D4D00D6DB21 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A4AFAAB1D3F212000536109 /* inode_struct.c in Sources */,
 				6AFCD19D1D3C8D4D00D6DB21 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -239,6 +279,7 @@
 				6AFCD1A21D3C8D4D00D6DB21 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
