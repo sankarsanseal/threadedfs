@@ -26,12 +26,17 @@ int main(int argc, const char * argv[]) {
     unsigned int no_of_inode;
     unsigned int size_in_bytes;
     unsigned int blocksize;
+    unsigned int pid;
     char blanked=' ';
+    char path_to_server_fifo[1024];
+    char path_to_lock_file[1024];
+    
 //    INODE_STRUCT ind;
     
-
+    pid=getpid();
     
     FILE * fsfile;
+    FILE * fsfilelock;
     
 
     
@@ -48,8 +53,12 @@ int main(int argc, const char * argv[]) {
         no_of_inode=(size_in_bytes)/blocksize;
         printf("Possible no of inodes %u for filesystem size %u MB with data block size %u bytes\n",
                no_of_inode,atoi(argv[1]), atoi(argv[2]));
+        sprintf(path_to_lock_file,"%s.lock",argv[3]);
+        
         if(!access(argv[3],F_OK))
         {
+            
+            fsfilelock=fopen(path_to_lock_file,"w")
             fsfile=fopen(argv[3],"r+");
             fseek(fsfile,0,SEEK_SET);
         }
@@ -62,7 +71,19 @@ int main(int argc, const char * argv[]) {
 
         }
         
-        printf("Server process id:%u\n",getpid());
+        
+        printf("Server process id:%u\n",pid);
+        sprintf(path_to_server_fifo,"/tmp/server.%d",pid);
+  
+        
+        if(access(path_to_server_fifo,F_OK))
+        {
+            
+        }
+        else
+        {
+            printf("Already a server fifo is running w\n");
+        }
         
         
         
