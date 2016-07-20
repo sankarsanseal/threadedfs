@@ -127,7 +127,7 @@ int main(int argc, const char * argv[]) {
                 sprintf(path_to_client_fifo,"/tmp/client.%d",client_pid);
                 
                 clientfifo=open(path_to_client_fifo,O_WRONLY);
-                sprintf(msg,"Instruction %d received for user %d\n",instruct_code,userid);
+                sprintf(msg,"Instruction %d received for user %d %s\n",instruct_code,userid,path);
                 write(clientfifo,msg , MAXSIZE);
                 close(clientfifo);
                 
