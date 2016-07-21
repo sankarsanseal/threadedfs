@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6A4AFAAB1D3F212000536109 /* inode_struct.c in Sources */ = {isa = PBXBuildFile; fileRef = 6A4AFAAA1D3F212000536109 /* inode_struct.c */; };
 		6AFCD19D1D3C8D4D00D6DB21 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 6AFCD19C1D3C8D4D00D6DB21 /* main.c */; };
 /* End PBXBuildFile section */
 
@@ -34,7 +33,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		6A4AFAAA1D3F212000536109 /* inode_struct.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = inode_struct.c; sourceTree = "<group>"; };
 		6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = threadedfs_client.xcodeproj; path = threadedfs_client/threadedfs_client.xcodeproj; sourceTree = "<group>"; };
 		6AFCD1991D3C8D4D00D6DB21 /* threadedfs */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = threadedfs; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFCD19C1D3C8D4D00D6DB21 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
@@ -80,7 +78,6 @@
 			children = (
 				6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */,
 				6AFCD19C1D3C8D4D00D6DB21 /* main.c */,
-				6A4AFAAA1D3F212000536109 /* inode_struct.c */,
 			);
 			path = threadedfs;
 			sourceTree = "<group>";
@@ -157,7 +154,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A4AFAAB1D3F212000536109 /* inode_struct.c in Sources */,
 				6AFCD19D1D3C8D4D00D6DB21 /* main.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

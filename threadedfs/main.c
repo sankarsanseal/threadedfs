@@ -15,11 +15,68 @@
 #include <fcntl.h>
 #include <string.h>
 #include <pthread.h>
+#include "threadedfs_client/threadedfs_client/struct_msg.h"
 #define MAXSIZE 1024
 #define MAXLINE 80
 
 
-#include "inode_struct.c"
+
+MSGP allot_msg()
+{
+    MSGP temp;
+    
+    if((temp=(MSGP)malloc(sizeof (MSG)))!=NULL)
+        return temp;
+    else
+        return NULL;
+    
+}
+
+SMSGP allot_smsg()
+{
+    SMSGP temp;
+    
+    if((temp=(SMSGP)malloc(sizeof (SMSG)))!=NULL)
+        return temp;
+    else
+        return NULL;
+    
+}
+
+
+void * write_cmsg(void * temp)
+{
+    MSGP temp2=(MSGP) temp;
+    SMSGP temp3;
+    
+    char path_to_client_fifo[MAXSIZE];
+    unsigned int clientfifo;
+
+    
+    sprintf(path_to_client_fifo,"/tmp/client.%d",temp2->client_pid);
+
+    clientfifo=open(path_to_client_fifo,O_WRONLY);
+    
+    temp3=allot_smsg();
+    if(temp3!=NULL)
+    {
+        strcpy(temp3->msg_body,"Instruction received for user");
+        temp3->more=0;
+        temp3->msg_id=1;
+        write(clientfifo, temp3 , sizeof(temp3));
+        free(temp3);
+        
+    }
+    else
+        printf("Problem with Server Message writing\n");
+    free(temp2);
+    close(clientfifo);
+    
+    return NULL;
+}
+
+
+
 
 FILE * file_create(const char * filename)
 {
@@ -38,8 +95,8 @@ int main(int argc, const char * argv[]) {
     unsigned int userid;
     unsigned int instruct_code;
     pid_t client_pid;
+    pthread_t tid;
     
-    unsigned int clientfifo;
     
     int errno;
     ssize_t n;
@@ -47,9 +104,11 @@ int main(int argc, const char * argv[]) {
     char buff[MAXSIZE];
     char path[MAXSIZE];
     char path_to_server_fifo[MAXSIZE];
-    char path_to_client_fifo[MAXSIZE];
+    
     char path_to_lock_file[MAXSIZE];
     char msg[MAXSIZE];
+    
+    MSGP temp,temp2;
     
 //    INODE_STRUCT ind;
     
@@ -119,20 +178,30 @@ int main(int argc, const char * argv[]) {
             servfifo=open("/tmp/server",O_RDONLY);
             dummy=open("/tmp/server",O_WRONLY);
             
-            while((n=read(servfifo,buff,MAXLINE)))
-            {
+            temp=allot_msg();
             
-                printf("%s\n",buff);
-                sscanf(buff, "%d %d %s %d",&instruct_code,&userid,path,&client_pid);
+            if(temp!=NULL)
+            {
+                while((n=read(servfifo,temp,sizeof(MSG))))
+                {
+            
+                 
+                    temp2=allot_msg();
+                    
+                    if(temp2!=NULL)
+                    {
+                        temp2=temp;
+                        pthread_create(&tid, NULL, write_cmsg, (void *)temp2);
+                        
+                    }
+                    
                 
-                sprintf(path_to_client_fifo,"/tmp/client.%d",client_pid);
+                }
                 
-                clientfifo=open(path_to_client_fifo,O_WRONLY);
-                sprintf(msg,"Instruction %d received for user %d %s\n",instruct_code,userid,path);
-                write(clientfifo,msg , MAXSIZE);
-                close(clientfifo);
-                
-                
+            }
+            else
+            {
+                printf("Some problem with memory allocation\n");
             }
             unlink("/tmp/server");
         }
