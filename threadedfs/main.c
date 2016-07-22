@@ -131,6 +131,7 @@ void file_create()
     int i;
     int no_of_datablock_add;
     int no_of_user;
+    off_t last_written_free_block=0;
     
     FDBP free_data_block;
     
@@ -160,11 +161,27 @@ void file_create()
     
     free_data_block=(FDBP)malloc(sizeof(FDB)*no_of_datablock_add);
     
+    for(i=0;i<no_of_datablock_add;i++)
+    {
+     *(free_data_block+i)=0;   
+    }
+    
+    for(i=0;i<no_of_datablock_add-1 && ftello(fsfile)<size_in_bytes;i++)
+    {
+        filesuperblock.first_avail_block[i]=ftello(fsfile);
+        fseek(fsfile,sizeof(FDB),SEEK_CUR);
+    }
+    
+    filesuperblock.first_avail_block[i]=ftello(fsfile);
+    last_written_free_block=ftello(fsfile);
+    
+    for(i=0;i<no_of_datablock_add;i++)
+        printf("Data block address %lld %i\n", filesuperblock.first_avail_block[i],i);
+    
     while(ftello(fsfile)<size_in_bytes)
     {
         
-        
-        for(i=0;i<no_of_datablock_add && ftello(fsfile)<size_in_bytes;i++)
+        for(i=0;i<no_of_datablock_add-1 && ftello(fsfile)<size_in_bytes;i++)
         {
             *(free_data_block+i)=ftello(fsfile);
            // printf("Size of %ld %d\n", sizeof(off_t),i);
@@ -172,9 +189,28 @@ void file_create()
         
         }
         
+        
+        *(free_data_block+i)=ftello(fsfile);
+        i++;
+        
+        for(i=0;i<no_of_datablock_add;i++)
+            printf("Data block address %lld %i\n", free_data_block[i],i);
+        
+        
+        printf("Ftell before write %lld\n",ftello(fsfile));
+
+        fseek(fsfile,-sizeof(FDB)*i,SEEK_SET);
         fwrite(free_data_block,sizeof(FDB)*i,1,fsfile);
+        last_written_free_block=ftello(fsfile)-sizeof(FDB)*i;
+        
+        printf("Ftell after write %lld and last written block %lld\n",ftello(fsfile),last_written_free_block);
+        
+        
         
     }
+    
+    //printing all free blocks
+    
     
     //Return to first inode location and create home directories for given users
     fseek(fsfile,sizeof(SB),SEEK_SET);

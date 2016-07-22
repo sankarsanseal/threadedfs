@@ -8,12 +8,13 @@
 
 #ifndef inode_struct_h
 #define inode_struct_h
+#define MAX_FREE_DATA_BLOCK 512
 
 typedef struct superblock
 {
     long remembered;
     long no_fdata_block;
-    off_t first_avail_block;
+    off_t first_avail_block[512];
     
 } * SBP, SB;
 
