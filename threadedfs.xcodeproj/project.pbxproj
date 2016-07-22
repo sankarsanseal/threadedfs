@@ -33,6 +33,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6A24205F1D40C4AE006B6121 /* inode_struct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = inode_struct.h; sourceTree = "<group>"; };
 		6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = threadedfs_client.xcodeproj; path = threadedfs_client/threadedfs_client.xcodeproj; sourceTree = "<group>"; };
 		6AFCD1991D3C8D4D00D6DB21 /* threadedfs */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = threadedfs; sourceTree = BUILT_PRODUCTS_DIR; };
 		6AFCD19C1D3C8D4D00D6DB21 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
@@ -78,6 +79,7 @@
 			children = (
 				6A4AFABF1D3F424E00536109 /* threadedfs_client.xcodeproj */,
 				6AFCD19C1D3C8D4D00D6DB21 /* main.c */,
+				6A24205F1D40C4AE006B6121 /* inode_struct.h */,
 			);
 			path = threadedfs;
 			sourceTree = "<group>";

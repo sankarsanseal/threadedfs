@@ -14,10 +14,34 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
-#include <pthread.h>
 #include "threadedfs_client/threadedfs_client/struct_msg.h"
+#include "inode_struct.h"
 #define MAXSIZE 1024
 #define MAXLINE 80
+
+unsigned int servfifo;
+unsigned int dummy;
+
+char path_to_server_fifo[MAXSIZE];
+char path_to_lock_file[MAXSIZE];
+char path_to_file[MAXSIZE];
+char msg[MAXSIZE];
+
+FILE * fsfile;
+FILE * fsfilelock;
+
+unsigned int no_of_inode;
+unsigned int size_in_bytes;
+unsigned int size_in_MB;
+unsigned int no_of_datablock;
+unsigned int blocksize;
+unsigned int pid;
+
+SB filesuperblock;
+
+INODE empty_inode;
+DIRSTRC empty_datablock;
+
 
 
 
@@ -43,6 +67,18 @@ SMSGP allot_smsg()
     
 }
 
+void cleanup(int signaltype)
+{
+    
+    close(servfifo);
+    fclose(fsfile);
+    fclose(fsfilelock);
+    unlink(path_to_lock_file);
+    unlink("/tmp/server");
+    printf("\nClean up complete.\n");
+    exit(0);
+}
+
 
 void * write_cmsg(void * temp)
 {
@@ -61,8 +97,9 @@ void * write_cmsg(void * temp)
     if(temp3!=NULL)
     {
         strcpy(temp3->msg_body,"Instruction received for user");
+        printf("%s",temp3->msg_body);
         temp3->more=0;
-        temp3->msg_id=1;
+        temp3->msg_id=temp2->instruct_code;
         write(clientfifo, temp3 , sizeof(temp3));
         free(temp3);
         
@@ -75,38 +112,142 @@ void * write_cmsg(void * temp)
     return NULL;
 }
 
+void initialize_empty_inode()
+{
+    int i;
+    empty_inode.accessed=0;
+    empty_inode.created=0;
+    empty_inode.grdid=0;
+    empty_inode.modified=0;
+    empty_inode.userid=0;
+    
+    for(i=0;i<sizeof(empty_inode.datablock)/sizeof(empty_inode.datablock[0]);i++)
+        empty_inode.datablock[i]=0;
+}
 
 
+void file_create()
+{
+    int i;
+    int no_of_datablock_add;
+    int no_of_user;
+    
+    FDBP free_data_block;
+    
+    fsfilelock = fopen(path_to_lock_file,"w");
+    fsfile=fopen(path_to_file,"w");
+    
+    initialize_empty_inode();
+    
+    fseek(fsfile,sizeof(SB),SEEK_SET);
+    
+    for(i=0;i<no_of_inode;i++)
+    fwrite(&empty_inode,sizeof(INODE),1,fsfile);
+    
+    printf("Inode blocks are written upto :%lld\n",ftello(fsfile));
+    
 
-FILE * file_create(const char * filename)
+    no_of_datablock=(size_in_bytes-sizeof(SB)-(sizeof(INODE)*no_of_inode))/blocksize;
+    
+    
+
+    
+    empty_datablock.inode=0;
+    empty_datablock.name[0]='\0';
+    
+    no_of_datablock_add=blocksize/sizeof(off_t);
+    printf("no_of_datablock_add per datablock %d\n",no_of_datablock_add);
+    
+    free_data_block=(FDBP)malloc(sizeof(FDB)*no_of_datablock_add);
+    
+    while(ftello(fsfile)<size_in_bytes)
+    {
+        
+        
+        for(i=0;i<no_of_datablock_add && ftello(fsfile)<size_in_bytes;i++)
+        {
+            *(free_data_block+i)=ftello(fsfile);
+           // printf("Size of %ld %d\n", sizeof(off_t),i);
+            fseek(fsfile,sizeof(FDB),SEEK_CUR);
+        
+        }
+        
+        fwrite(free_data_block,sizeof(FDB)*i,1,fsfile);
+        
+    }
+    
+    //Return to first inode location and create home directories for given users
+    fseek(fsfile,sizeof(SB),SEEK_SET);
+    
+    printf("Enter the number of users in filesystem:");
+    scanf("%d",&no_of_user);
+    
+    for(i=0;i<no_of_user;i++)
+    {
+        
+        
+    }
+    
+    
+}
+
+void point_user_dir()
 {
     
-    return fopen(filename,"w");
+    
 }
+
+void print_present_user_dir()
+{
+    
+}
+
+void change_user_dir()
+{
+    
+}
+
+void make_user_dir()
+{
+    
+}
+
+void remove_user_dir()
+{
+    
+}
+
+void changeowner()
+{
+    
+}
+
+void create_user_file()
+{
+    
+}
+
+void rename_copy_user_file_dir()
+{
+    
+}
+
+void delete_user_file()
+{
+    
+}
+
+
 
 int main(int argc, const char * argv[]) {
     // insert code here...
-    unsigned int no_of_inode;
-    unsigned int size_in_bytes;
-    unsigned int blocksize;
-    unsigned int pid;
-    unsigned int servfifo;
-    unsigned int dummy;
-    unsigned int userid;
-    unsigned int instruct_code;
-    pid_t client_pid;
+
+
     pthread_t tid;
     
     
     int errno;
     ssize_t n;
-    char blanked=' ';
-    char buff[MAXSIZE];
-    char path[MAXSIZE];
-    char path_to_server_fifo[MAXSIZE];
-    
-    char path_to_lock_file[MAXSIZE];
-    char msg[MAXSIZE];
     
     MSGP temp,temp2;
     
@@ -114,48 +255,48 @@ int main(int argc, const char * argv[]) {
     
     pid=getpid();
     
-    FILE * fsfile;
-    FILE * fsfilelock;
-    
-
+   
+    signal(SIGINT,cleanup);
+    signal(SIGKILL,cleanup);
     
     if( argc !=4)
     {
-        printf("usage:%s <size in MB> <data block size> <path to file>\n",argv[0]);
+        printf("usage:%s <size in MB> <path to file>\n",argv[0]);
         return 1;
     }
     else
     {
-      /*  size_in_bytes=atoi(argv[1])<<20;
+        size_in_MB=atoi(argv[1]);
+        size_in_bytes=size_in_MB <<20;
         blocksize=atoi(argv[2]);
+        
+        strcpy(path_to_file,argv[3]);
         
         no_of_inode=(size_in_bytes)/blocksize;
         printf("Possible no of inodes %u for filesystem size %u MB with data block size %u bytes\n",
-               no_of_inode,atoi(argv[1]), atoi(argv[2]));
+               no_of_inode,size_in_MB, blocksize);
+        
         sprintf(path_to_lock_file,"%s.lock",argv[3]);
         
-        if(!access(argv[3],F_OK))
+        if((!access(path_to_file,F_OK))&&(access(path_to_lock_file,F_OK)))
         {
             
-            fsfilelock=fopen(path_to_lock_file,"w")
-            fsfile=fopen(argv[3],"r+");
+            fsfilelock=fopen(path_to_lock_file,"w");
+            fsfile=fopen(path_to_file,"r+");
             fseek(fsfile,0,SEEK_SET);
         }
         else
         {
-            fsfile=file_create(argv[3]);
-            fseek(fsfile,size_in_bytes,SEEK_SET);
-            fwrite(&blanked,sizeof(char),1,fsfile);
-            fseek(fsfile,0,SEEK_SET);
-
+            file_create();
         }
         
         
         printf("Server process id:%u\n",pid);
-        sprintf(path_to_server_fifo,"/tmp/server.%d",pid);
+        printf("Server is running.\n To stop the server gracefully please press Ctrl+c\n");
+        //sprintf(path_to_server_fifo,"/tmp/server.%d",pid);
   
         
-        if(access(path_to_server_fifo,F_OK))
+       /* if(access(path_to_server_fifo,F_OK))
         {
             
         }
@@ -167,10 +308,13 @@ int main(int argc, const char * argv[]) {
         
         
         fclose(fsfile);*/
+        
+
+        
         if((errno=mkfifo("/tmp/server", S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH|S_IRGRP)<0))
         {
             printf("FIFO exists\n");
-            unlink("/tmp/server");
+            cleanup(SIGINT);
         }
         else
         {
@@ -185,14 +329,35 @@ int main(int argc, const char * argv[]) {
                 while((n=read(servfifo,temp,sizeof(MSG))))
                 {
             
-                 
-                    temp2=allot_msg();
-                    
-                    if(temp2!=NULL)
+                 switch(temp->instruct_code)
                     {
-                        temp2=temp;
-                        pthread_create(&tid, NULL, write_cmsg, (void *)temp2);
-                        
+                        case 1:
+                            point_user_dir();
+                            break;
+                        case 2:
+                            print_present_user_dir();
+                            break;
+                        case 3:
+                            change_user_dir();
+                            break;
+                        case 4:
+                            make_user_dir();
+                            break;
+                        case 5:
+                            remove_user_dir();
+                            break;
+                        case 6:
+                            changeowner();
+                            break;
+                        case 7:
+                            create_user_file();
+                            break;
+                        case 8:
+                            rename_copy_user_file_dir();
+                            break;
+                        case 9:
+                            delete_user_file();
+                            break;
                     }
                     
                 
@@ -203,7 +368,7 @@ int main(int argc, const char * argv[]) {
             {
                 printf("Some problem with memory allocation\n");
             }
-            unlink("/tmp/server");
+            cleanup(SIGINT);
         }
         return 0;
     }
