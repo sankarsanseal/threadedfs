@@ -12,9 +12,10 @@
 
 typedef struct superblock
 {
-    long remembered;
-    long no_fdata_block;
+    off_t remembered;
+
     off_t first_avail_block;
+    int no_fdata_block;
     
 } * SBP, SB;
 

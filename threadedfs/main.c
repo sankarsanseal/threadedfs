@@ -136,14 +136,16 @@ void file_create()
     FDBP free_data_block;
     FDBP block_address;
     FDBP SB_FREE;
+    SB test_SB;
     
     
-    fsfilelock = fopen(path_to_lock_file,"w");
-    fsfile=fopen(path_to_file,"w");
+    fsfilelock = fopen(path_to_lock_file,"wb+");
+    fsfile=fopen(path_to_file,"wb+");
     
     initialize_empty_inode();
     
     fseek(fsfile,sizeof(SB),SEEK_SET);
+    filesuperblock.remembered=ftello(fsfile);
     
     for(i=0;i<no_of_inode;i++)
     fwrite(&empty_inode,sizeof(INODE),1,fsfile);
@@ -185,11 +187,11 @@ void file_create()
     fread(block_address,blocksize,1,fsfile);
     
     for(i=0;i<no_of_datablock_add;i++)
-        printf("Data block address %lld %i\n", SB_FREE[i],i);
+        printf("Data block address %lld %i\n", block_address[i],i);
     
-/*    last_written_free_block=SB_FREE[i-1];
+    last_written_free_block=SB_FREE[i-1];
     
-    while((size_in_bytes-last_written_free_block)>blocksize)
+    while((int)(size_in_bytes-last_written_free_block)>blocksize)
     {
         fseek(fsfile,last_written_free_block+blocksize,SEEK_SET);
 
@@ -212,7 +214,7 @@ void file_create()
         
         
         
-    }*/
+    }
     
     //fseek(fsfile,0,SEEK_SET)
     //fwrite(
@@ -224,14 +226,49 @@ void file_create()
     
     fseek(fsfile,filesuperblock.first_avail_block,SEEK_SET);
     printf("Value of filesuperblock %lld ftell %lld\n",filesuperblock.first_avail_block,ftello(fsfile));
- /*   while((size_in_bytes-ftello(fsfile))>blocksize)
+    while((int)(size_in_bytes-ftello(fsfile))>blocksize)
     {
         fread(block_address,blocksize,1,fsfile);
-        for(i=0;(i<no_of_datablock_add) ;i++)
+        for(i=0;(i<no_of_datablock_add);i++)
+        {
             printf("Free block at %lld\n",block_address[i]);
+            if((int)(size_in_bytes - block_address[i]) < blocksize)
+                break;
+        }
+        if(i==no_of_datablock_add)
         fseek(fsfile,block_address[i-1],SEEK_SET);
-    }*/
+        else
+            break;
+    }
     
+    fseek(fsfile,0,SEEK_SET);
+    fwrite(&filesuperblock,sizeof(filesuperblock),1,fsfile);
+    fseek(fsfile,0,SEEK_SET);
+    fread(&test_SB,sizeof(SB),1,fsfile);
+    
+    printf("First Free inode %lld and Free data block list %lld\n", test_SB.remembered,test_SB.first_avail_block);
+    
+    fseek(fsfile,test_SB.first_avail_block,SEEK_SET);
+    printf("Value of filesuperblock %lld ftell %lld\n",filesuperblock.first_avail_block,ftello(fsfile));
+    
+    for(i=0;i<no_of_datablock_add;i++)
+        block_address[i]=0;
+    while((int)(size_in_bytes-ftello(fsfile))>blocksize)
+    {
+        fread(block_address,blocksize,1,fsfile);
+        for(i=0;(i<no_of_datablock_add);i++)
+        {
+            printf("2nd time check Free block at %lld\n",block_address[i]);
+            if((int)(size_in_bytes - block_address[i]) < blocksize)
+                break;
+        }
+        if(i==no_of_datablock_add)
+            fseek(fsfile,block_address[i-1],SEEK_SET);
+        else
+            break;
+    }
+    
+
     
     //Return to first inode location and create home directories for given users
     //fseek(fsfile,sizeof(SB),SEEK_SET);
@@ -329,7 +366,7 @@ int main(int argc, const char * argv[]) {
         
         strcpy(path_to_file,argv[3]);
         
-        no_of_inode=(size_in_bytes)/blocksize;
+        no_of_inode=(int)(size_in_bytes)/blocksize;
         printf("Possible no of inodes %u for filesystem size %u MB with data block size %u bytes\n",
                no_of_inode,size_in_MB, blocksize);
         
@@ -339,7 +376,7 @@ int main(int argc, const char * argv[]) {
         {
             
             fsfilelock=fopen(path_to_lock_file,"w");
-            fsfile=fopen(path_to_file,"r+");
+            fsfile=fopen(path_to_file,"rb+");
             fseek(fsfile,0,SEEK_SET);
         }
         else
