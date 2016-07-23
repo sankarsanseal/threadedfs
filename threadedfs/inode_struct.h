@@ -14,7 +14,7 @@ typedef struct superblock
 {
     long remembered;
     long no_fdata_block;
-    off_t first_avail_block[512];
+    off_t first_avail_block;
     
 } * SBP, SB;
 
